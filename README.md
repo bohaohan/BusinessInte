@@ -1,0 +1,1 @@
+My homework of bussiness intelligence. Using CNN and SIFT to recognize logos of luxury goods.
