@@ -12,21 +12,27 @@ import itertools as it
 
 image_extensions = ['.bmp', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.pbm', '.pgm', '.ppm']
 
+
 class Bunch(object):
     def __init__(self, **kw):
         self.__dict__.update(kw)
     def __str__(self):
         return str(self.__dict__)
 
+
 def splitfn(fn):
     path, fn = os.path.split(fn)
     name, ext = os.path.splitext(fn)
     return path, name, ext
 
+
 def anorm2(a):
     return (a*a).sum(-1)
+
+
 def anorm(a):
-    return np.sqrt( anorm2(a) )
+    return np.sqrt(anorm2(a))
+
 
 def homotrans(H, x, y):
     xs = H[0, 0]*x + H[0, 1]*y + H[0, 2]
@@ -34,11 +40,13 @@ def homotrans(H, x, y):
     s  = H[2, 0]*x + H[2, 1]*y + H[2, 2]
     return xs/s, ys/s
 
+
 def to_rect(a):
     a = np.ravel(a)
     if len(a) == 2:
         a = (0, 0, a[0], a[1])
     return np.array(a, np.float64).reshape(2, 2)
+
 
 def rect2rect_mtx(src, dst):
     src, dst = to_rect(src), to_rect(dst)
@@ -60,6 +68,7 @@ def lookat(eye, target, up = (0, 0, 1)):
     tvec = -np.dot(R, eye)
     return R, tvec
 
+
 def mtx2rvec(R):
     w, u, vt = cv2.SVDecomp(R - np.eye(3))
     p = vt[0] + u[:,0]*w[0]    # same as np.dot(R, vt[0])
@@ -68,9 +77,11 @@ def mtx2rvec(R):
     axis = np.cross(vt[0], vt[1])
     return axis * np.arctan2(s, c)
 
+
 def draw_str(dst, (x, y), s):
-    cv2.putText(dst, s, (x+1, y+1), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0), thickness = 2, lineType=cv2.CV_AA)
+    cv2.putText(dst, s, (x+1, y+1), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0), thickness=2, lineType=cv2.CV_AA)
     cv2.putText(dst, s, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.0, (255, 255, 255), lineType=cv2.CV_AA)
+
 
 class Sketcher:
     def __init__(self, windowname, dests, colors_func):
@@ -100,14 +111,15 @@ class Sketcher:
 
 
 # palette data from matplotlib/_cm.py
-_jet_data =   {'red':   ((0., 0, 0), (0.35, 0, 0), (0.66, 1, 1), (0.89,1, 1),
+_jet_data = {'red':   ((0., 0, 0), (0.35, 0, 0), (0.66, 1, 1), (0.89,1, 1),
                          (1, 0.5, 0.5)),
                'green': ((0., 0, 0), (0.125,0, 0), (0.375,1, 1), (0.64,1, 1),
                          (0.91,0,0), (1, 0, 0)),
                'blue':  ((0., 0.5, 0.5), (0.11, 1, 1), (0.34, 1, 1), (0.65,0, 0),
                          (1, 0, 0))}
 
-cmap_data = { 'jet' : _jet_data }
+cmap_data = {'jet': _jet_data}
+
 
 def make_cmap(name, n=256):
     data = cmap_data[name]
@@ -124,8 +136,10 @@ def make_cmap(name, n=256):
         channels.append(ch)
     return np.uint8(np.array(channels).T*255)
 
+
 def nothing(*arg, **kw):
     pass
+
 
 def clock():
     return cv2.getTickCount() / cv2.getTickFrequency()
@@ -139,10 +153,12 @@ def Timer(msg):
     finally:
         print "%.2f ms" % ((clock()-start)*1000)
 
+
 class StatValue:
     def __init__(self, smooth_coef = 0.5):
         self.value = None
         self.smooth_coef = smooth_coef
+
     def update(self, v):
         if self.value is None:
             self.value = v
@@ -150,13 +166,16 @@ class StatValue:
             c = self.smooth_coef
             self.value = c * self.value + (1.0-c) * v
 
+
 class RectSelector:
+
     def __init__(self, win, callback):
         self.win = win
         self.callback = callback
         cv2.setMouseCallback(win, self.onmouse)
         self.drag_start = None
         self.drag_rect = None
+
     def onmouse(self, event, x, y, flags, param):
         x, y = np.int16([x, y]) # BUG
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -175,6 +194,7 @@ class RectSelector:
                 self.drag_rect = None
                 if rect:
                     self.callback(rect)
+
     def draw(self, vis):
         if not self.drag_rect:
             return False
@@ -191,6 +211,7 @@ def grouper(n, iterable, fillvalue=None):
     args = [iter(iterable)] * n
     return it.izip_longest(fillvalue=fillvalue, *args)
 
+
 def mosaic(w, imgs):
     '''Make a grid from images.
 
@@ -204,12 +225,15 @@ def mosaic(w, imgs):
     rows = grouper(w, imgs, pad)
     return np.vstack(map(np.hstack, rows))
 
+
 def getsize(img):
     h, w = img.shape[:2]
     return w, h
 
+
 def mdot(*args):
     return reduce(np.dot, args)
+
 
 def draw_keypoints(vis, keypoints, color = (0, 255, 255)):
     for kp in keypoints:

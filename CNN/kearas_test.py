@@ -3,16 +3,13 @@ from __future__ import print_function
 # -*- coding: UTF-8 -*-
 __author__ = 'bohaohan'
 
-from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.advanced_activations import PReLU
+from keras.layers.core import Dense, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
-from keras.optimizers import SGD, Adadelta, Adagrad
-from keras.utils import np_utils, generic_utils
-from six.moves import *
-from data import *
-from pre_pro import *
+from keras.optimizers import SGD
+from keras.utils import np_utils
+from SIFT.data import *
+from SIFT.pre_pro import *
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')

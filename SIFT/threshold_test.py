@@ -7,7 +7,6 @@ from skimage import data
 from skimage.filters import threshold_otsu, threshold_adaptive
 import numpy as np
 
-# image = data.page()
 image = cv2.imread("./img2/AstonMartin阿斯顿马丁_4.jpg", 0)
 global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh

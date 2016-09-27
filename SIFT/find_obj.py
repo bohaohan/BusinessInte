@@ -14,7 +14,9 @@ USAGE
 
 import numpy as np
 import cv2
-from common import anorm, getsize
+
+from SIFT.common import anorm
+
 
 FLANN_INDEX_KDTREE = 1  # bug: flann enums are missing
 FLANN_INDEX_LSH    = 6
@@ -61,6 +63,7 @@ def filter_matches(kp1, kp2, matches, ratio = 0.75):
     kp_pairs = zip(mkp1, mkp2)
     return p1, p2, kp_pairs
 
+
 def explore_match(win, img1, img2, kp_pairs, status = None, H = None):
     h1, w1 = img1.shape[:2]
     h2, w2 = img2.shape[:2]
@@ -102,6 +105,7 @@ def explore_match(win, img1, img2, kp_pairs, status = None, H = None):
             cv2.line(vis, (x1, y1), (x2, y2), green)
 
     cv2.imshow(win, vis)
+
     def onmouse(event, x, y, flags, param):
         cur_vis = vis
         if flags & cv2.EVENT_FLAG_LBUTTON:

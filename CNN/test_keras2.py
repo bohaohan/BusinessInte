@@ -9,15 +9,13 @@
 #导入各种用到的模块组件
 from __future__ import absolute_import
 from __future__ import print_function
-from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.advanced_activations import PReLU
+from keras.layers.core import Dense, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
-from keras.optimizers import SGD, Adadelta, Adagrad
-from keras.utils import np_utils, generic_utils
+from keras.optimizers import SGD
+from keras.utils import np_utils
 # from six.moves import range
-from data import load_data
+from SIFT.data import load_data
 import random, cPickle
 
 
@@ -93,19 +91,4 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd, class_mode="catego
 #数据经过随机打乱shuffle=True。verbose=1，训练过程中输出的信息，0、1、2三种方式都可以，无关紧要。show_accuracy=True，训练时每一个epoch都输出accuracy。
 #validation_split=0.2，将20%的数据作为验证集。
 hist = model.fit(data, label, batch_size=128, nb_epoch=100, shuffle=True, verbose=1, show_accuracy=True, validation_split=0.0)
-# print(hist.history)
-# test_data = get_data("./test_img/Audi奥迪_3.jpg")
-# test_data = test_data[index]
-# data = np.empty((1, 1, 100, 100), dtype="int")
-# data[0, :, :, :] = test_data
-# print (data)
-# result = model.predict_proba(data, verbose=1)
-# result2 = model.predict_on_batch(data)
-# result3 = model.predict(data)
-# result4 = model.predict_classes(data, verbose=0)
-# model.predict_on_batch()
-# model.predict_proba()
-# model.predict()
-# name = logos[int(model.predict_classes(data)[0])]
-# print (result, name, 'result !!!!!!!!!!!!')
-cPickle.dump(model, open("./PKL/final_model122222.pkl", "wb"))
+

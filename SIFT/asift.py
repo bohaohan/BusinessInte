@@ -19,19 +19,16 @@ USAGE
   Press left mouse button on a feature point to see its matching point.
 '''
 
-import numpy as np
-import cv2
-import itertools as it
 from multiprocessing.pool import ThreadPool
 import time
-from skimage.filters import threshold_adaptive
-from detect import *
-from common import Timer
-from find_obj import init_feature, filter_matches, explore_match
-from featureIO import *
 import cPickle as pickle
 from datetime import datetime
 import codecs
+
+from detect import *
+from common import Timer
+from find_obj import init_feature, filter_matches
+from SIFT.featureIO import *
 
 logos = ['Acura讴歌','Armani阿玛尼','AstonMartin阿斯顿马丁','Audi奥迪','AZIMUT阿兹慕','Balenciaga巴黎世家',
          'Bally巴利','Beneteau博纳多','Bentley宾利','Benz奔驰','Biotherm碧欧泉','Blumarine蓝色情人','BMW宝马',
@@ -49,13 +46,12 @@ logos = ['Acura讴歌','Armani阿玛尼','AstonMartin阿斯顿马丁','Audi奥�
          'Tiffany蒂芙尼','Tissot天梭','Titoni梅花','TSL谢瑞麟','VanCleefArpels梵克雅宝','VeraWang王薇薇','Volvo沃尔沃',
          'Wally沃利','YSL圣罗兰','三宅一生','名士','太子珠宝','江诗丹顿','灰雁伏特加','维多利亚的秘密','芝柏GP','高缇耶']
 
-class img_search:
 
+class img_search:
 
     def __init__(self, name):
         self.alg = name
         self.keypoints_database = None
-
 
     def search(self, fn1):
         if self.keypoints_database == None:
@@ -64,9 +60,6 @@ class img_search:
             self.keypoints_database = pickle.load(open("./feature/keypoints_database_"+self.alg+".p", "rb"))
             print 'load complete cost:', datetime.now() - start_time
 
-
-
-        # print __doc__
         import sys, getopt
         opts, args = getopt.getopt(sys.argv[1:], '', ['feature='])
         opts = dict(opts)
@@ -79,7 +72,8 @@ class img_search:
         # img2 = cv2.imread(img1)
         detector, matcher = init_feature(feature_name)
         # print detector, '123123'
-        if detector != None:
+
+        if detector is not None:
             print 'using', feature_name
         else:
             print 'unknown feature:', feature_name
@@ -90,16 +84,9 @@ class img_search:
             kp1, desc1 = affine_detect(detector, img1, pool=pool)
         except:
             return '0'
-        # kp2, desc2 = affine_detect(detector, img2, pool=pool)
-        # image = cv2.imread("./img/Balvenie百富.jpg")
-        # kp, desc = affine_detect(detector, image, pool=pool)
-        # temp = pickle_keypoints(kp, desc, "1", "2"
-        #
+
         results = []
-        # kp2, desc2, name, path = unpickle_keypoints(keypoints_database[1])
-        # print path[0]
-        # # print 'img1 - %d features, img2 - %d features' % (len(kp1), len(kp2))
-        #
+
         def match_and_draw(win, kpa, desca3):
             with Timer('matching'):
                 raw_matches = matcher.knnMatch(desc1, trainDescriptors=desca3, k=2) #2
@@ -112,9 +99,7 @@ class img_search:
                 return win, kp_pairs, H, (np.sum(status))
             else:
                 return win, kp_pairs, None, -1
-            # vis = explore_match(win, img1, img2, kp_pairs, None, H) #show
-        # kp2, desc2 = affine_detect(detector, imgt, pool=pool)
-        # match_and_draw('affine find_obj', kp2, desc2)
+
         start_m = datetime.now()
         for keypoints_data in self.keypoints_database:
             kp3, desc3, name, path = unpickle_keypoints(keypoints_data)
@@ -127,15 +112,10 @@ class img_search:
         print 'match finish: ', datetime.now() - start_m
         results.sort(reverse=True, key=lambda x: x['num'])
         results = self.get_result(results)
-        # for i in results:
-        #     print i['name']
-        # img2 = cv2.imread(results[0]['path']+'_0.jpg', 0)
+
         for i in results:
             print i
         return results[0]['name']
-        # vis = explore_match(results[0]['win'], img1, img2, results[0]['kp_pairs'], None, results[0]['H']) #show
-        # cv2.waitKey()
-        # cv2.destroyAllWindows()
 
     def training(self):
         # save training data
@@ -180,16 +160,19 @@ class img_search:
         print 'successful finish'
         # end save\
 
-
     def add_data(self, num, inter=49):
+
         temp_array = pickle.load(open("./feature/keypoints_database_"+self.alg+".p", "rb"))
         # save training data
         import glob, sys, getopt
+
         opts, args = getopt.getopt(sys.argv[1:], '', ['feature='])
         opts = dict(opts)
+
         feature_name = opts.get('--feature', self.alg+'-flann')
         detector, matcher = init_feature(feature_name)
-        if detector!=None:
+
+        if detector is not None:
             print 'using', feature_name
         else:
             print 'unknown feature:', feature_name
@@ -220,6 +203,7 @@ class img_search:
                     # time.sleep(1)
                 else:
                     time.sleep(1)
+
         pickle.dump(temp_array, open("./feature/keypoints_database_"+self.alg+".p", "wb"))
         print 'error!!!'
         for i in errors:
@@ -227,12 +211,14 @@ class img_search:
         print 'successful finish'
         # end save\
 
-
     def get_result(self, results):
+
         k = 0
         re = {}
         rea = []
+
         for r in results:
+
             if get_name(r['name']) in re.keys():
                 re[get_name(r['name'])] += 1
             else:
@@ -240,49 +226,63 @@ class img_search:
             k += 1
             if k > 3:
                 break
+
         for k in re.keys():
             rea.append({'name': k, 'count': re[k]})
         rea.sort(reverse=True, key=lambda x: x['count'])
+
         return rea
 
 
 def test(alg, min=0):
+
     file = codecs.open('test.txt', 'ab', encoding='utf-8')
     sift = img_search(alg)
+
     import glob
     total = 0.0
     correct = 0.0
     start_test = datetime.now()
+
     print "start testing!"
     line = "start testing! " + str(start_test) + '\n'
     file.write(line.decode("unicode_escape"))
     num = 0
+
     for imagePath in glob.glob("./test_img3_bi/*.*"):
         num += 1
         if num > min:
             try:
+
                 imagename = imagePath[imagePath.rfind("/") + 1:imagePath.rfind(".")]
                 imageName = get_name(imagename)
+
                 print 'matching', imagePath
                 line = "matching "+imagePath + str(datetime.now())+'\n'
                 file.write(line.decode("unicode_escape"))
                 start_time = datetime.now()
                 result = sift.search(imagePath)
+
                 if result != '0':
                     total += 1.0
+
                 print 'match', imageName, result
                 print 'match finish cost:', datetime.now() - start_time
                 line = "match "+imagePath+' '+result+' '+str(datetime.now())+'\n'
+
                 file.write(line.decode("unicode_escape"))
                 if imageName == result:
                     correct += 1.0
                     print 'correct'
+
             except:
                 print imagePath
                 line = "error "+imagePath+' '+str(datetime.now())+'\n'
                 file.write(line.decode("unicode_escape"))
+
         if num - min > 50:
             break
+
     print 'total:', total, 'correct', correct
     print 'correct percent:', float(correct)/total
     print 'cost time', datetime.now() - start_test
@@ -292,12 +292,4 @@ def test(alg, min=0):
 
 
 if __name__ == '__main__':
-    # sift = img_search('sift')
-    # sift.search('./test_img3_bi/Armani阿玛尼_1.jpg')
     test('sift')
-    # me = img_search('sift')
-    # me.training()
-    # me.add_data(51, 54)
-    # print me.search('./test_img/Chevrolet雪佛兰.jpg')
-    # me.add_data(104, 1)
-    # surf.add_data(344)
